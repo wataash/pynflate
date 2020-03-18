@@ -1,6 +1,6 @@
 from pytest import fixture
-from pynflate.huffman import Codec, huffman, compress
-from pynflate.huffman import tree_encode
+from src.pynflate.huffman import Codec, huffman, compress
+from src.pynflate.huffman import tree_encode
 
 
 @fixture
@@ -54,6 +54,36 @@ class TestHuffman:
         assert codes == {'a': '0', 'b': '1'}
 
     def test_complex_case(self):
+        # freq 1 4 5 7 10
+        #      c d b e  a
+        #      ^ ^
+        # c 0
+        # d 1
+        # -
+        # 5  5 7 10
+        # b cd e  a
+        # ^ ^^
+        # b 0
+        # c 1 0
+        # d 1 1
+        # -
+        # 7 10  10
+        # e  a bcd
+        # ^  ^
+        # a 1
+        # b   0
+        # c   01
+        # d   11
+        # e 0
+        # -
+        #  10 17
+        # bcd ae
+        # ^^^ ^^
+        # a 1 1
+        # b 0 0
+        # c 0 01
+        # d 0 11
+        # e 1 0
         codes = huffman({
             'a': 10, 'b': 5,
             'c': 1, 'd': 4,
@@ -78,14 +108,18 @@ class TestCompress:
         assert compress('a') == '0'
 
     def test_two_chars(self):
+        # a 1
+        # b 0
         assert compress('aba') == '101'
 
 
 class TestEncodeTree:
     def test_interface(self):
+        # len('0')
         assert tree_encode(['0']) == [1]
 
     def test_real_case(self):
+        # len('0') len('10') len('110') len('111')
         tree = ['0', '10', '110', '111']
         codes = [1, 2, 3, 3]
         assert tree_encode(tree) == codes
